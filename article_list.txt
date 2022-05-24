@@ -97,4 +97,7 @@ title : title915; authors : authors123; date_of_publication : date_of_publicatio
 title : title861; authors : authors152; date_of_publication : date_of_publication143; source : source102 
 title : title12; authors : authors827; date_of_publication : date_of_publication635; source : source184 
 title : title776; authors : authors971; date_of_publication : date_of_publication294; source : source685 
-title : title689; authors : authors83; date_of_publication : date_of_publication447; source : source860 
+title : title689; authors : authors83; date_of_publication : date_of_publication447; source : source860
+title : title6869; authors : authors853; date_of_publication : date_of_publication47; source : source861
+title : title6869; authors : authors853; date_of_publication : date_of_publication47; source : source861
+title : title6869; authors : authors853; date_of_publication : date_of_publication47; source : source861

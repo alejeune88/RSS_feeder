@@ -19,6 +19,7 @@
             on_press: 
                 root.manager.transition.direction = 'up'
                 root.manager.current = 'article_screen'
+                app.update_article_scrollview()
         Button:
             text: 'RSS Subscribe'
             pos_hint: {"x":0.35, "y":0.6}
@@ -37,8 +38,8 @@
             
 
 <ArticleScreen>:
-    id: article_screen
     FloatLayout:
+        id: article_screen
         Button:
             text: 'Back to menu'
             size_hint: 0.3, 0.1
@@ -65,16 +66,34 @@
             on_press: 
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'filters_screen'
-        
+        Button:
+            text: 'Update'
+            size_hint: 0.3, 0.1
+            pos_hint: {"right":1, "bottom":0}
+            on_press: 
+                app.update_article_scrollview()
         # BoxLayout:
         #     size_hint: 0.3, 0.1
         #     pos_hint: {"x":0.50, "y":0.1}
         #     on_parent:
         #         self.add_widget(Article_layout(article_str = root.get_article_list()[0], name='Article_layout'))
-        BoxLayout:
+        # BoxLayout:
+        #     size_hint: 0.9, 0.7
+        #     pos_hint: {"x":0.05, "y":0.15}
+        
+        ScrollView:
+            id: scroll
             size_hint: 0.9, 0.7
+            do_scroll_x: False
+            do_scroll_y: True
             pos_hint: {"x":0.05, "y":0.15}
-            
+            BoxLayout:
+                id: box
+                spacing:10
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+
         # ScrollView:
         #     do_scroll_x: False
         #     do_scroll_y: True

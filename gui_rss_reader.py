@@ -5,6 +5,8 @@ Created on Tue May  3 20:19:07 2022
 @author: Arthur
 """
 
+from functools import partial
+
 from kivy.app import App
 from kivy.uix.button import Button
 from kivy.uix.label import Label
@@ -17,6 +19,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.lang import Builder
 from kivy.config import Config
 from kivy.uix.behaviors import ButtonBehavior
+from kivy.clock import Clock
 
 import numpy as np
 from rss_reader import get_information, Article
@@ -135,7 +138,7 @@ class testApp(App):
     
 class MainApp(App):
 
-    def build(self):
+    def build(self): 
         # Create the manager
         sm = ScreenManager()
         sm.add_widget(MainScreen(name="main_screen"))
@@ -144,25 +147,47 @@ class MainApp(App):
         sm.add_widget(FilterScreen(name="filters_screen"))
         return sm
     
+    def get_article_list(self):
+        article_list_path = 'article_list.txt'
+        with open(article_list_path,'r') as f:
+            article_list = f.readlines()
+        return article_list
+    
+    def adjust_scroll(self, bottom, dt):
+            vp_height = self.root.get_screen("article_screen").ids.scroll.viewport_size[1]
+            sv_height = self.root.get_screen("article_screen").ids.scroll.height
+            self.root.get_screen("article_screen").ids.scroll.scroll_y = bottom / (vp_height - sv_height)
+            
     def update_article_scrollview(self):
-        layout = GridLayout(cols=1, spacing=1, size_hint=(None, None))
-        layout.bind(minimum_height=layout.setter('height'),
-                     minimum_width=layout.setter('width'))
-        for i in range(40):
-            btn = Button(text=str(i), size_hint=(None, None),
-                         size=(200, 100))
-            layout.add_widget(btn)
-        scrollview = ScrollView(scroll_type=['bars'],
-                                 bar_width='9dp',
-                                 scroll_wheel_distance=100)
-        scrollview.add_widget(layout)
-        root.add_widget(scrollview)
 
+        vp_height = self.root.get_screen("article_screen").ids.scroll.viewport_size[1]
+        sv_height = self.root.get_screen("article_screen").ids.scroll.height
         
+        article_list = self.get_article_list()
+        
+        for i, article_str in enumerate(article_list):
+            article_layour = Article_layout(article_str=article_str, size_hint=(1, None), height=100)
+            self.root.get_screen("article_screen").ids.box.add_widget(article_layour)
+
+        if vp_height > sv_height:  # otherwise there is no scrolling
+            # calculate y value of bottom of scrollview in the viewport
+            scroll = self.root.get_screen("article_screen").ids.scroll.scroll_y
+            bottom = scroll * (vp_height - sv_height)
+
+            # use Clock.schedule_once because we need updated viewport height
+            # this assumes that new widgets are added at the bottom
+            # so the current bottom must increase by the widget height to maintain position
+            Clock.schedule_once(partial(self.adjust_scroll, bottom), -1)
+
+        def get_article_layout(self):
+            article_list = self.get_article_list()
+            article_layout_list = [Article_layout(article_str) for i, article_str in enumerate(article_list)]
+            return article_layout_list
+    
 def generate_random_article(number_of_articles):
     random_array = np.random.randint(0,1000,[number_of_articles,4])
     
-    article_list = np.array([Article(f'title{num[0]}', f'authors{num[1]}', f'date_of_publication{num[2]}', f'source{num[3]}') for num in random_array])
+    article_list = np.array([Article(f'title{num[0]};authors{num[1]};date_of_publication{num[2]};source{num[3]}') for num in random_array])
     
     return article_list
 
