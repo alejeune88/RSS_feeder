@@ -1,0 +1,123 @@
+#:kivy 1.0
+#:import Button kivy.uix.button.Button
+
+# creating button feature
+<Button>:
+    font_size: 40
+      
+    # creating button
+    # a button 30 % of the width and 50 %
+    # of the height of the layout 
+    size_hint: 0.3, 0.3
+
+
+<MainScreen>:
+    FloatLayout:
+        Button:
+            text: 'Article Review'
+            pos_hint: {"x":0.05, "y":0.6}
+            on_press: 
+                root.manager.transition.direction = 'up'
+                root.manager.current = 'article_screen'
+        Button:
+            text: 'RSS Subscribe'
+            pos_hint: {"x":0.35, "y":0.6}
+            on_press: 
+                root.manager.transition.direction = 'up'
+                root.manager.current = 'rss_sub_screen'
+        Button:
+            text: 'Filters'
+            pos_hint: {"x":0.65, "y":0.6}
+            on_press: 
+                root.manager.transition.direction = 'up'
+                root.manager.current = 'filters_screen'
+        Button:
+            pos_hint: {"x":0.35, "y":0.1}
+            text:'Save and exit'
+            
+
+<ArticleScreen>:
+    id: article_screen
+    FloatLayout:
+        Button:
+            text: 'Back to menu'
+            size_hint: 0.3, 0.1
+            pos_hint: {"x":0.0, "bottom":0.0}
+            on_press: root.manager.current = 'main_screen'
+        Button:
+            text: 'Article Review'
+            size_hint: 0.3, 0.1
+            pos_hint: {"x":0.025, "top":1}
+            on_press: 
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'article_screen'
+        Button:
+            text: 'RSS Subscribe'
+            size_hint: 0.3, 0.1
+            pos_hint: {"x":0.35, "top":1}
+            on_press: 
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'rss_sub_screen'
+        Button:
+            text: 'Filters'
+            size_hint: 0.3, 0.1
+            pos_hint: {"x":0.675, "top":1}
+            on_press: 
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'filters_screen'
+        
+        # BoxLayout:
+        #     size_hint: 0.3, 0.1
+        #     pos_hint: {"x":0.50, "y":0.1}
+        #     on_parent:
+        #         self.add_widget(Article_layout(article_str = root.get_article_list()[0], name='Article_layout'))
+        BoxLayout:
+            size_hint: 0.9, 0.7
+            pos_hint: {"x":0.05, "y":0.15}
+            
+        # ScrollView:
+        #     do_scroll_x: False
+        #     do_scroll_y: True
+        #     size_hint: 0.9, 0.7
+        #     pos_hint: {"x":0.05, "y":0.15}
+        #     on_parent:
+        #         self.add_widget(root.get_article_grid_layout())
+            
+        #     # GridLayout:
+        #     #     id: layout_content
+        #     #     size_hint_y: None
+        #     #     cols: 1
+        #     #     row_default_height: '50dp'
+        #     #     height: root.get_height()
+        #     #     spacing: 0, 0.0
+        #     #     padding: 0, 0.0
+        #     #     on_parent:
+        #     #         for i, article in enumerate(root.get_article_layout()): self.ids[str(i)]=article; self.ids.i.add_widget(article); print(self.ids)
+                    
+
+        #     #         #self.add_widget(Button(text = article,
+        #     #         #font_size='20dp',
+        #     #         #size_hint=(self.size_hint_x,self.row_default_height),
+        #     #         #height=self.row_default_height,
+        #     #         #))
+        #     #         #)
+
+                
+
+<RssSubScreen>:
+    GridLayout:
+        cols: 1
+        Label:
+            text: 'RssSub'
+        Button:
+            text: 'Back to menu'
+            on_press: root.manager.current = 'main_screen'
+            
+<FilterScreen>:
+    GridLayout:
+        cols: 1
+        Label:
+            text: 'Filter'
+        Button:
+            text: 'Back to menu'
+            on_press: root.manager.current = 'main_screen'
