@@ -1,7 +1,18 @@
 #:kivy 1.0
 #:import Button kivy.uix.button.Button
 
+#: set BG_color (100/255,100/255,100/255,1)
+#: set Article_color (150/255,100/255,200/255,1)
+#: set Button_color (161/255,171/255,240/255,1)
+#: set article_selected_color (255/255,20/255,0/255,1)
+#: set default_font_size 20
 # creating button feature
+<MainLayout>:
+    id: main
+    orientation: 'vertical'
+    Top_layout:
+        id: top_layout
+
 <Button>:
     font_size: 40
       
@@ -9,77 +20,287 @@
     # a button 30 % of the width and 50 %
     # of the height of the layout 
     size_hint: 0.3, 0.3
+    background_color : Button_color
 
+<MenuButton>:
+    text: 'Back to menu'
+    size_hint: 0.3, 0.1
+    pos_hint: {"x":0.0, "bottom":0.0}
+    on_press:
+        root.parent.parent.manager.transition.direction = app.get_transition(root.parent.parent.name, "main_screen")
+        root.parent.parent.manager.current = 'main_screen'
+
+<Top_layout>:
+    cols: 3
+    size_hint: 1, 0.05
+    pos_hint: {"x":0, "top":1}
+    spacing_horizontal: 10
+
+    Button:
+        text: 'Article Review'
+        size_hint: 0.3, 0.1
+        pos_hint: {"x":0.025, "top":1}
+        text_size: self.size
+        font_size: min(default_font_size, self.height)
+        halign: "center"
+        valign: "center"
+        on_press: 
+            print(app.sm, app.sm.current)
+            app.sm.transition.direction = app.get_transition(app.sm.current, "article_screen")
+            app.sm.current = 'article_screen'
+            # root.parent.parent.manager.transition.direction = app.get_transition(root.parent.parent.name, "article_screen")
+            # root.parent.parent.manager.current = 'article_screen'
+            app.update_scrollview("article_screen")
+    Button:
+        text: 'RSS Subscribe'
+        size_hint: 0.3, 0.1
+        pos_hint: {"x":0.35, "top":1}
+        text_size: self.size
+        font_size: min(default_font_size, self.height)
+        halign: "center"
+        valign: "center"
+        on_press: 
+            root.parent.parent.manager.transition.direction = app.get_transition(root.parent.parent.name, "rss_sub_screen")
+            root.parent.parent.manager.current = 'rss_sub_screen'
+            app.update_scrollview("rss_sub_screen")
+    Button:
+        text: 'Filters'
+        size_hint: 0.3, 0.1
+        pos_hint: {"x":0.675, "top":1}
+        text_size: self.size
+        font_size: min(default_font_size, self.height)
+        halign: "center"
+        valign: "center"
+        on_press: 
+            root.parent.parent.manager.transition.direction = app.get_transition(root.parent.parent.name, "filters_screen")
+            root.parent.parent.manager.current = 'filters_screen'
+
+
+<Bottom_layout>:
+    cols: 3
+    size_hint: 1, 0.05
+    pos_hint: {"x":0, "y":0}
+    spacing_horizontal: 10
+
+    Button:
+        text: 'Save and quit' if root.parent.parent.name == 'main_screen' else 'back to menu'
+        size_hint: 0.3, 0.1
+        pos_hint: {"x":0.0, "bottom":0.0}
+        text_size: self.size
+        font_size: min(default_font_size, self.height)
+        halign: "center"
+        valign: "center"
+        on_press:
+            if root.parent.parent.name == 'main_screen' : \
+            app.save();\
+            app.close_application();
+            else: \
+            root.parent.parent.manager.transition.direction = app.get_transition(root.parent.parent.name, "main_screen");\
+            root.parent.parent.manager.current = 'main_screen'
+    
+    Label:
+        id:void
+
+
+    Button:
+        text: 'Quit' if root.parent.parent.name == 'main_screen' else 'Save'
+        size_hint: 0.3, 0.1
+        pos_hint: {"x":0.0, "bottom":0.0}
+        text_size: self.size
+        font_size: min(default_font_size, self.height)
+        halign: "center"
+        valign: "center"
+        on_press:
+            if root.parent.parent.name == 'main_screen' : app.close_application();
+            else: app.update_scrollview(root.parent.parent.name)
+    
+<Article_layout>:
+    id: article_layout + root.index
+    size_hint: 1, None
+    height: 100
+    
+    canvas.before:
+        Color:
+            rgba : Article_color
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    ToggleButton:
+        id: number
+        text: root.index
+        background_color: {'normal': Button_color, 'down': article_selected_color} [self.state]
+        size_hint: (0.1, 1)
+        pos_hint: {'x':0, 'y':0}
+        halign: "center"
+        valign: "center"
+        on_state:
+            app.select_article(root.index)
+
+    Label:
+        id: title
+        text: root.article_info["title"]
+        size_hint: (0.5, 0.4)
+        pos_hint: {'x':0.11, 'top':1}
+        text_size: self.size
+        halign: "left"
+        valign: "center"
+
+    Label:
+        id: author
+        text: root.article_info["authors"]
+        size_hint: (0.5, 0.4)
+        pos_hint: {'x':0.11, 'y':0.3}
+        text_size: self.size
+        halign: "left"
+        valign: "center"
+
+    Label:
+        id: dop
+        text: root.article_info["date_of_publication"]
+        size_hint: (0.5, 0.4)
+        pos_hint: {'x':0.11, 'y':0}
+        text_size: self.size
+        halign: "left"
+        valign: "center"
+
+    Label:
+        id: source
+        text: root.article_info["source"]
+        size_hint: (0.5, 0.4)
+        pos_hint: {'right':0.99, 'top':1}
+        text_size: self.size
+        halign: "right"
+        valign: "center"
+
+    Button:
+        id: link
+        text: "article link"
+        font_size: 20
+        size_hint: (0.2, 0.3)
+        pos_hint: {'right':0.99, 'y':0.01}
+        on_press:
+            app.open_link(root.article_info["link"])
+
+<RSS_link_layout>:
+    id: rss_layout
+    size_hint: 1, None
+    height: 50
+
+    canvas.before:
+        Color:
+            rgba : Article_color
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    Label:
+        id: title
+        text: root.rss_link
+        size_hint: (0.89, 1)
+        pos_hint: {'x':0.01, 'y':0}
+        text_size: self.size
+        halign: "left"
+        valign: "center"
+
+    Button:
+        size_hint : 0.1, 1
+        pos_hint: {'right':1, 'y':0}
+        text: '-'
+        text_size: self.size
+        background_color : (1,0,0,1)
+        halign: "center"
+        valign: "center"
+        on_press:
+            app.delete_rss_sub_link(root.index)
 
 <MainScreen>:
     FloatLayout:
-        Button:
-            text: 'Article Review'
-            pos_hint: {"x":0.05, "y":0.6}
-            on_press: 
-                root.manager.transition.direction = 'up'
-                root.manager.current = 'article_screen'
-                app.update_article_scrollview()
-        Button:
-            text: 'RSS Subscribe'
-            pos_hint: {"x":0.35, "y":0.6}
-            on_press: 
-                root.manager.transition.direction = 'up'
-                root.manager.current = 'rss_sub_screen'
-        Button:
-            text: 'Filters'
-            pos_hint: {"x":0.65, "y":0.6}
-            on_press: 
-                root.manager.transition.direction = 'up'
-                root.manager.current = 'filters_screen'
-        Button:
-            pos_hint: {"x":0.35, "y":0.1}
-            text:'Save and exit'
+
+        canvas.before:
+            Color:
+                rgba : BG_color
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        # Top_layout:
+        #     id: top_layout
+        
+        Bottom_layout:
+            id : bottom_layout
+
+        Label:
+            id: ReadMe
+            text: "Read me"
+            multiline:True
             
+            size_hint: 0.8, 0.8
+            pos_hint: {"x":0.1,"y":0.1}
+            text_size: self.size
+            color: 0,0,0,1
+            font_size : 30
+            halign: 'left'
+            valign: 'top'
+
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+        
+        
+
+        
 
 <ArticleScreen>:
+    id: article_screen
+    canvas.before:
+        Color:
+            rgba : BG_color
+        Rectangle:
+            pos: self.pos
+            size: self.size
     FloatLayout:
-        id: article_screen
-        Button:
-            text: 'Back to menu'
-            size_hint: 0.3, 0.1
-            pos_hint: {"x":0.0, "bottom":0.0}
-            on_press: root.manager.current = 'main_screen'
-        Button:
-            text: 'Article Review'
-            size_hint: 0.3, 0.1
-            pos_hint: {"x":0.025, "top":1}
-            on_press: 
-                root.manager.transition.direction = 'right'
-                root.manager.current = 'article_screen'
-        Button:
-            text: 'RSS Subscribe'
-            size_hint: 0.3, 0.1
-            pos_hint: {"x":0.35, "top":1}
-            on_press: 
-                root.manager.transition.direction = 'left'
-                root.manager.current = 'rss_sub_screen'
-        Button:
-            text: 'Filters'
-            size_hint: 0.3, 0.1
-            pos_hint: {"x":0.675, "top":1}
-            on_press: 
-                root.manager.transition.direction = 'left'
-                root.manager.current = 'filters_screen'
-        Button:
-            text: 'Update'
-            size_hint: 0.3, 0.1
-            pos_hint: {"right":1, "bottom":0}
-            on_press: 
-                app.update_article_scrollview()
-        # BoxLayout:
+        
+        # MenuButton:
+        #     id: MB
+        Top_layout:
+            id: top_layout
+        
+        Bottom_layout:
+            id : bottom_layout
+
+        # Button:
+        #     text: 'Update'
         #     size_hint: 0.3, 0.1
-        #     pos_hint: {"x":0.50, "y":0.1}
-        #     on_parent:
-        #         self.add_widget(Article_layout(article_str = root.get_article_list()[0], name='Article_layout'))
-        # BoxLayout:
-        #     size_hint: 0.9, 0.7
-        #     pos_hint: {"x":0.05, "y":0.15}
+        #     pos_hint: {"right":1, "bottom":0}
+        #     on_press: 
+        #         app.update_scrollview("article_screen")
+
+        ToggleButton:
+            id: select_all_button
+            text: 'Select all'
+            size_hint: 0.2, 0.05
+            pos_hint: {"x":0.05, "y":0.86}
+            text_size: self.size
+            halign: "center"
+            on_state: 
+                for child in root.ids.box.children: child.ids.number.state = self.state
+
+        Button:
+            id: select_all_button
+            text: 'Delete selected'
+            size_hint: 0.2, 0.05
+            pos_hint: {"x":0.3, "y":0.86}
+            text_size: self.size
+            halign: "center"
+            on_press:
+                app.delete_article() 
+   
+                
+        Top_layout:
+            id: top_layout
         
         ScrollView:
             id: scroll
@@ -89,54 +310,86 @@
             pos_hint: {"x":0.05, "y":0.15}
             BoxLayout:
                 id: box
+                spacing: 10
+                
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+
+
+                
+
+<RssSubScreen>:
+    FloatLayout:
+        id: article_screen
+        canvas.before:
+            Color:
+                rgba : BG_color
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Top_layout:
+            id: top_layout
+        
+        Bottom_layout:
+            id : bottom_layout
+        
+        GridLayout:
+            cols:3
+            pos_hint: {'x': 0.05, 'top': 0.89}
+            size_hint: 0.9, 0.1
+            
+            Label:
+                id: label
+                text: "Subscribe to RSS link:"
+                size_hint: 0.1, 1
+                text_size: self.size
+                valign: "center"
+                halign: "center"
+
+            TextInput:
+                id: input_rss_link
+                hint_text:'Enter text'
+                size_hint: 0.7, 1
+
+            Button:
+                size_hint : None, 1
+                height: self.width
+                text: '+'
+                text_size: self.size
+                background_color : (0,1,0,1)
+                halign: "center"
+                valign: "center"
+                on_press:
+                    app.add_rss_sub_link()
+        
+        ScrollView:
+            id: scroll
+            size_hint: 0.9, 0.6
+            do_scroll_x: False
+            do_scroll_y: True
+            pos_hint: {"x":0.05, "top":0.78}
+            BoxLayout:
+                id: box
                 spacing:10
                 orientation: 'vertical'
                 size_hint_y: None
                 height: self.minimum_height
 
-        # ScrollView:
-        #     do_scroll_x: False
-        #     do_scroll_y: True
-        #     size_hint: 0.9, 0.7
-        #     pos_hint: {"x":0.05, "y":0.15}
-        #     on_parent:
-        #         self.add_widget(root.get_article_grid_layout())
-            
-        #     # GridLayout:
-        #     #     id: layout_content
-        #     #     size_hint_y: None
-        #     #     cols: 1
-        #     #     row_default_height: '50dp'
-        #     #     height: root.get_height()
-        #     #     spacing: 0, 0.0
-        #     #     padding: 0, 0.0
-        #     #     on_parent:
-        #     #         for i, article in enumerate(root.get_article_layout()): self.ids[str(i)]=article; self.ids.i.add_widget(article); print(self.ids)
-                    
 
-        #     #         #self.add_widget(Button(text = article,
-        #     #         #font_size='20dp',
-        #     #         #size_hint=(self.size_hint_x,self.row_default_height),
-        #     #         #height=self.row_default_height,
-        #     #         #))
-        #     #         #)
-
-                
-
-<RssSubScreen>:
-    GridLayout:
-        cols: 1
-        Label:
-            text: 'RssSub'
-        Button:
-            text: 'Back to menu'
-            on_press: root.manager.current = 'main_screen'
-            
 <FilterScreen>:
-    GridLayout:
-        cols: 1
+    FloatLayout:
+        canvas.before:
+            Color:
+                rgba : BG_color
+            Rectangle:
+                pos: self.pos
+                size: self.size
         Label:
             text: 'Filter'
-        Button:
-            text: 'Back to menu'
-            on_press: root.manager.current = 'main_screen'
+            font_size: 100
+        Top_layout:
+            id: top_layout
+        Bottom_layout:
+            id : bottom_layout

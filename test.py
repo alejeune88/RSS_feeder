@@ -4,6 +4,8 @@ Created on Fri May 13 22:29:31 2022
 
 @author: Arthur
 """
+import os
+os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
 
 from functools import partial
 
