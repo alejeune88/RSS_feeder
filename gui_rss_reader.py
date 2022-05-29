@@ -31,11 +31,12 @@ from kivy.uix.scrollview import ScrollView
 import json
 import webbrowser
 
+import time
+
 class MainScreen(Screen):
-    state = 'normal'
     pass
+
 class ArticleScreen(Screen):
-    state = 'normal'
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # self.article_grid_layout = Article_grid_layout()
@@ -65,7 +66,8 @@ class ArticleScreen(Screen):
             
     pass
 
-class MainLayout(BoxLayout):
+
+class MainLayout(FloatLayout):
     pass
 
 class RssSubScreen(Screen):
@@ -76,10 +78,10 @@ class FilterScreen(Screen):
     state = 'normal'
     pass
 
-class Top_layout(GridLayout):
+class Top_layout(BoxLayout):
     pass
 
-class Bottom_layout(GridLayout):
+class Bottom_layout(BoxLayout):
     pass
 
 class MenuButton(Button):
@@ -119,14 +121,19 @@ class MainApp(App):
         self.last_deleted_link = None
         self.selected_article = set()
         Builder.load_file('RSS_kivy.kv')
-        ML = MainLayout()
+        ML = MainLayout(size=Window.size)
         # Create the manager
-        self.sm = ScreenManager()
+        self.sm = ScreenManager(size_hint=(1, 0.9), pos_hint={'center_x':0.5, 'center_y':0.5})
         self.sm.add_widget(MainScreen(name="main_screen"))
         self.sm.add_widget(ArticleScreen(name="article_screen"))
         self.sm.add_widget(RssSubScreen(name="rss_sub_screen"))
         self.sm.add_widget(FilterScreen(name="filters_screen"))
-    
+        TL = Top_layout(size_hint=(1, 0.05),height=50,pos_hint={'x':0, 'top':1})
+        BL = Bottom_layout(size_hint=(1, 0.05),height=50,pos_hint={'x':0, 'y':0})
+        ML.add_widget(TL)
+        ML.add_widget(BL)
+        # self.sm.size_hint=(1, (ML.height - (TL.height+BL.height))/ML.height)
+        # print(self.sm.height)
         ML.add_widget(self.sm)
         return ML
     
@@ -140,8 +147,10 @@ class MainApp(App):
     
     def get_article_layout_list(self, article_list):
         article_layout_list = [None]*len(article_list)
+        t = time.time()
         for i, article_info in enumerate(article_list):
             article_layout_list[i] = Article_layout(article_info=article_info, index=i)
+        print('t:',time.time()-t)
         return article_layout_list
     
     def get_rss_sub_layout_list(self, rss_sub_list):
@@ -168,21 +177,22 @@ class MainApp(App):
         self.sm.get_screen(screen_name).ids.box.clear_widgets()
         vp_height = self.sm.get_screen(screen_name).ids.scroll.viewport_size[1]
         sv_height = self.sm.get_screen(screen_name).ids.scroll.height
-        
+
         if screen_name == "article_screen":
+            t0 = time.time()
             if len(self.article_layout_list) == 0:
                 self.article_layout_list = self.get_article_layout_list(self.article_list)
-                
+            t1 = time.time()
             for i, article_layout in enumerate(self.article_layout_list[::-1]):
                 self.sm.get_screen(screen_name).ids.box.add_widget(article_layout, index=i)
-                
+            print(time.time()-t1,t1-t0)
         elif screen_name == "rss_sub_screen":
             if len(self.rss_sub_layout_list) == 0:
                 self.rss_sub_layout_list = self.get_rss_sub_layout_list(self.rss_sub_list)
                 
             for i, rss_sub_layout in enumerate(self.rss_sub_layout_list[::-1]):
                 self.sm.get_screen(screen_name).ids.box.add_widget(rss_sub_layout)
-                
+
         if vp_height > sv_height:  # otherwise there is no scrolling
             # calculate y value of bottom of scrollview in the viewport
             scroll = self.sm.get_screen(screen_name).ids.scroll.scroll_y
@@ -193,7 +203,7 @@ class MainApp(App):
             Clock.schedule_once(partial(self.adjust_scroll, bottom, screen_name=screen_name), -1)
     
     def add_rss_sub_link(self):
-        input_value = self.root.get_screen("rss_sub_screen").ids.input_rss_link.text
+        input_value = self.sm.get_screen("rss_sub_screen").ids.input_rss_link.text
         self.rss_sub_list.append(input_value)
         index = len(self.rss_sub_list)-1
         self.rss_sub_layout_list.append(RSS_link_layout(rss_link=input_value, index=index))
@@ -265,6 +275,7 @@ class MainApp(App):
         except:
             transition = 'up'
         return transition
+    
 def generate_random_article(number_of_articles):
     random_array = np.random.randint(0,1000,[number_of_articles,4])
     

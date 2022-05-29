@@ -9,9 +9,7 @@
 # creating button feature
 <MainLayout>:
     id: main
-    orientation: 'vertical'
-    Top_layout:
-        id: top_layout
+
 
 <Button>:
     font_size: 40
@@ -31,88 +29,97 @@
         root.parent.parent.manager.current = 'main_screen'
 
 <Top_layout>:
-    cols: 3
-    size_hint: 1, 0.05
-    pos_hint: {"x":0, "top":1}
-    spacing_horizontal: 10
+    id: top_layout
+    orientation: 'horizontal'
+    # cols: 3
+    # size_hint: 1, None
+    # height: 100
+    pos_hint: {"x":0, "y":0}
+    spacing: 0
+    padding: 0,0,0,0
 
     Button:
+        id: article_button
         text: 'Article Review'
-        size_hint: 0.3, 0.1
-        pos_hint: {"x":0.025, "top":1}
+        size_hint: 0.3, 1
         text_size: self.size
         font_size: min(default_font_size, self.height)
         halign: "center"
         valign: "center"
+        background_color: article_selected_color if app.sm.current == "article_screen" else Button_color
         on_press: 
-            print(app.sm, app.sm.current)
             app.sm.transition.direction = app.get_transition(app.sm.current, "article_screen")
             app.sm.current = 'article_screen'
-            # root.parent.parent.manager.transition.direction = app.get_transition(root.parent.parent.name, "article_screen")
-            # root.parent.parent.manager.current = 'article_screen'
             app.update_scrollview("article_screen")
+            
+
     Button:
+        id: rss_button
         text: 'RSS Subscribe'
-        size_hint: 0.3, 0.1
-        pos_hint: {"x":0.35, "top":1}
+        size_hint: 0.3, 1
         text_size: self.size
         font_size: min(default_font_size, self.height)
         halign: "center"
         valign: "center"
-        on_press: 
-            root.parent.parent.manager.transition.direction = app.get_transition(root.parent.parent.name, "rss_sub_screen")
-            root.parent.parent.manager.current = 'rss_sub_screen'
+        background_color: article_selected_color if app.sm.current == "rss_sub_screen" else Button_color
+        on_press:
+            app.sm.transition.direction = app.get_transition(app.sm.current, "rss_sub_screen")
+            app.sm.current = 'rss_sub_screen'
             app.update_scrollview("rss_sub_screen")
+            
     Button:
+        id: filter_button
         text: 'Filters'
-        size_hint: 0.3, 0.1
-        pos_hint: {"x":0.675, "top":1}
+        size_hint: 0.3, 1
         text_size: self.size
         font_size: min(default_font_size, self.height)
         halign: "center"
         valign: "center"
-        on_press: 
-            root.parent.parent.manager.transition.direction = app.get_transition(root.parent.parent.name, "filters_screen")
-            root.parent.parent.manager.current = 'filters_screen'
+        background_color: article_selected_color if app.sm.current == "filters_screen" else Button_color
+        on_press:
+            app.sm.transition.direction = app.get_transition(app.sm.current, "filters_screen")
+            app.sm.current = 'filters_screen'
+            
 
 
 <Bottom_layout>:
-    cols: 3
-    size_hint: 1, 0.05
+    id : bottom_layout
+    orientation: 'horizontal'
+    # cols: 3
+    # size_hint: 1, None
+    # height: 100
     pos_hint: {"x":0, "y":0}
-    spacing_horizontal: 10
-
+    spacing: 0
+    padding: 0,1,0,0
     Button:
-        text: 'Save and quit' if root.parent.parent.name == 'main_screen' else 'back to menu'
-        size_hint: 0.3, 0.1
-        pos_hint: {"x":0.0, "bottom":0.0}
+        text: 'Save and quit' if app.sm.current == 'main_screen' else 'Back to menu'
+        size_hint: 0.3, 1
         text_size: self.size
         font_size: min(default_font_size, self.height)
         halign: "center"
         valign: "center"
         on_press:
-            if root.parent.parent.name == 'main_screen' : \
+            if app.sm.current == 'main_screen' : \
             app.save();\
             app.close_application();
             else: \
-            root.parent.parent.manager.transition.direction = app.get_transition(root.parent.parent.name, "main_screen");\
-            root.parent.parent.manager.current = 'main_screen'
+            app.sm.transition.direction = app.get_transition(app.sm.current, "main_screen");\
+            app.sm.current = 'main_screen'
     
     Label:
         id:void
 
 
     Button:
-        text: 'Quit' if root.parent.parent.name == 'main_screen' else 'Save'
-        size_hint: 0.3, 0.1
-        pos_hint: {"x":0.0, "bottom":0.0}
+        text: 'Quit' if app.sm.current == 'main_screen' else 'Save'
+        size_hint: 0.3, 1
         text_size: self.size
         font_size: min(default_font_size, self.height)
         halign: "center"
         valign: "center"
         on_press:
-            if root.parent.parent.name == 'main_screen' : app.close_application();
-            else: app.update_scrollview(root.parent.parent.name)
+            if app.sm.current == 'main_screen' : app.close_application();
+            else: app.update_scrollview(app.sm.current)
     
 <Article_layout>:
     id: article_layout + root.index
@@ -215,19 +222,15 @@
 
 <MainScreen>:
     FloatLayout:
-
+        size_hint : 1,1
+        spacing: 0
+        padding: 0,0,0,0
         canvas.before:
             Color:
                 rgba : BG_color
             Rectangle:
                 pos: self.pos
                 size: self.size
-
-        # Top_layout:
-        #     id: top_layout
-        
-        Bottom_layout:
-            id : bottom_layout
 
         Label:
             id: ReadMe
@@ -255,28 +258,13 @@
 
 <ArticleScreen>:
     id: article_screen
-    canvas.before:
-        Color:
-            rgba : BG_color
-        Rectangle:
-            pos: self.pos
-            size: self.size
     FloatLayout:
-        
-        # MenuButton:
-        #     id: MB
-        Top_layout:
-            id: top_layout
-        
-        Bottom_layout:
-            id : bottom_layout
-
-        # Button:
-        #     text: 'Update'
-        #     size_hint: 0.3, 0.1
-        #     pos_hint: {"right":1, "bottom":0}
-        #     on_press: 
-        #         app.update_scrollview("article_screen")
+        canvas.before:
+            Color:
+                rgba : BG_color
+            Rectangle:
+                pos: self.pos
+                size: self.size
 
         ToggleButton:
             id: select_all_button
@@ -284,7 +272,9 @@
             size_hint: 0.2, 0.05
             pos_hint: {"x":0.05, "y":0.86}
             text_size: self.size
+            font_size : min(20, self.height)
             halign: "center"
+            valign: "center"
             on_state: 
                 for child in root.ids.box.children: child.ids.number.state = self.state
 
@@ -294,13 +284,12 @@
             size_hint: 0.2, 0.05
             pos_hint: {"x":0.3, "y":0.86}
             text_size: self.size
+            font_size : min(20, self.height)
             halign: "center"
+            valign: "center"
             on_press:
                 app.delete_article() 
    
-                
-        Top_layout:
-            id: top_layout
         
         ScrollView:
             id: scroll
@@ -308,6 +297,7 @@
             do_scroll_x: False
             do_scroll_y: True
             pos_hint: {"x":0.05, "y":0.15}
+            scroll_wheel_distance : 200
             BoxLayout:
                 id: box
                 spacing: 10
@@ -329,11 +319,11 @@
                 pos: self.pos
                 size: self.size
 
-        Top_layout:
-            id: top_layout
+        # Top_layout:
+        #     id: top_layout
         
-        Bottom_layout:
-            id : bottom_layout
+        # Bottom_layout:
+        #     id : bottom_layout
         
         GridLayout:
             cols:3
@@ -352,6 +342,7 @@
                 id: input_rss_link
                 hint_text:'Enter text'
                 size_hint: 0.7, 1
+                
 
             Button:
                 size_hint : None, 1
@@ -389,7 +380,7 @@
         Label:
             text: 'Filter'
             font_size: 100
-        Top_layout:
-            id: top_layout
-        Bottom_layout:
-            id : bottom_layout
+        # Top_layout:
+        #     id: top_layout
+        # Bottom_layout:
+        #     id : bottom_layout

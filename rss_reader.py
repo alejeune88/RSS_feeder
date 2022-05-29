@@ -4,8 +4,9 @@ Created on Mon May  2 22:15:46 2022
 
 @author: Arthur
 """
-
+from html_parser import MyHTMLParser
 import feedparser
+import json
 
 class Article:
     def __init__(self, title, authors, date_of_publication, source)->None:
@@ -29,7 +30,8 @@ class Article:
 class RSS_feeder():
     def __init__(self, link_path:str=None):
         self._link_path = link_path
-        self._rss_link_list = self.get_RSS_link()
+        self._rss_link_list = self.get_rss_link()
+        self.html_parser = MyHTMLParser()
         
     def get_link_path(self):
         return self._link_path
@@ -50,15 +52,30 @@ class RSS_feeder():
                 data_list[i] = data.rstrip('\n')
         return data_list
     
-    def get_rss_feed(self):
-        
-        for rss_url in self._journal_link_list:
+    def get_rss_feed(self, key=''):
+        datas = []
+        for i, rss_url in enumerate(self._rss_link_list):
             d = feedparser.parse(rss_url)
-            headers = d.get('headers')
+            entries = d.get(key,d)
+            datas += entries
         
-        return headers
-        
+        return datas
     
+    def get_information_list(self):
+        entries = self.get_rss_feed('entries')        
+        
+        information_list = [None]*len(entries)
+        
+        for i, entrie in enumerate(entries):
+            self.html_parser.feed(entrie["summary_detail"]["value"])
+            information_list[i] = self.html_parser.get_data() + [entrie["title_detail"]["value"], entrie["link"]]
+            self.html_parser.reset_data()
+        return information_list
+    
+    def save_articles(self, articles, path=""):
+        with open(path, 'a') as f:
+            json.dump(articles, f)
+            
 def get_information(d:dict)->list:
     
     information_list = ["title",""]
@@ -78,13 +95,13 @@ def get_information(d:dict)->list:
 
 if __name__ == "__main__":
 
-    url = "https://rss.sciencedirect.com/publication/science/13598368"
+    # url = "https://rss.sciencedirect.com/publication/science/13598368"
     
+    # d = feedparser.parse(url)
+    # headers = d.get('headers')
     
+    # article_list = get_information(d)
     
-    d = feedparser.parse(url)
-    headers = d.get('headers')
+    # regex = r"<p\s*>(.*?)</p\s*>"
     
-    article_list = get_information(d)
-    
-    regex = r"<p\s*>(.*?)</p\s*>"
+    rssf = RSS_feeder('storage\RSS link.txt')
