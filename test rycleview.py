@@ -32,6 +32,7 @@ Builder.load_string('''
     viewclass: 'Article_layout'
     RecycleBoxLayout:
         size_hint_y: None
+        size_hint_x: 1
         height: self.minimum_height
         orientation: 'vertical'
 
