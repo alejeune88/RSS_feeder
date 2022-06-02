@@ -286,7 +286,7 @@ def generate_random_article(number_of_articles):
 if __name__ == '__main__':
     Window.size = (1000, 500)
     links_path = "storage/RSS link.txt"
-    articles_path = "storage/article_list.json"
+    articles_path = "storage/articles.json"
     MainApp(articles_path=articles_path, links_path=links_path).run()
 
 
